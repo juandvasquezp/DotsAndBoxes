@@ -7,9 +7,11 @@ Así que solo puse node como método para instalar typescript mas no como un pro
 
 Soy consciente que esto se pudo hacer efectivo con Deno, Ojalá Deno fuera mas popular.
 
-# Instalar dependencias
+# Instalar dependencias (TypeScript)
+
     npm install
 
 # Correr en modo dev
 Este modo compila automaticamente si cambia el squares.ts (Igualmente toca hacer F5 en el naavegador)
-    npm run compile
+
+    npm run start

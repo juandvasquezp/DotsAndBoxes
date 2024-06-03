@@ -1,4 +1,4 @@
 // Konekti
-declare var Konekti: any;
-declare var KonektiClient: any;
-declare var MainClient: any;
+declare let Konekti: any;
+declare let KonektiClient: any;
+declare let MainClient: any;

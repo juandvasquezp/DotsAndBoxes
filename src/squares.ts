@@ -15,9 +15,6 @@ es un número 0: arriba, 1: derecha, 2.abajo, 3:izquierda
 */
 
 // Konekti
-declare var Konekti: any;
-declare var KonektiClient: any;
-declare var MainClient: any;
 
 /**
 * Abstarct agent class
@@ -72,19 +69,19 @@ class Board{
     
     // Initializes a board of the given size. A board is a matrix of size*size of integers 0, .., 15, -1, or -2
     init(size : number){
-        var m = size-1
-        var board : Array<Array<number>> = []
+        const m = size-1
+        const board : Array<Array<number>> = []
         board[0] = []
         board[0][0] = 9
-        for(var j=1; j<m; j++){
+        for(let j=1; j<m; j++){
             board[0][j] = 1
         }
         board[0][m] = 3
         
-        for(var i=1; i<m; i++){
+        for(let i=1; i<m; i++){
             board[i] = []
             board[i][0] = 8
-            for(var j=1; j<m; j++){
+            for(let j=1; j<m; j++){
                 board[i][j] = 0
             }
             board[i][m] = 2
@@ -92,7 +89,7 @@ class Board{
         
         board[m] = []
         board[m][0] = 12
-        for(var j=1; j<m; j++){
+        for(let j=1; j<m; j++){
             board[m][j] = 4
         }
         board[m][m] = 6
@@ -102,11 +99,11 @@ class Board{
     
     // Deep clone of a board the reduce risk of damaging the real board
     clone(board : Array<Array<number>>){
-        var size = board.length
-        var b : Array<Array<number>> = []
-        for(var i=0; i<size; i++){
+        const size = board.length
+        const b : Array<Array<number>> = []
+        for(let i=0; i<size; i++){
             b[i] = []
-            for(var j=0; j<size; j++)
+            for(let j=0; j<size; j++)
                 b[i][j] = board[i][j]
         }
         return b
@@ -121,11 +118,11 @@ class Board{
     
     // Computes all the valid moves for the given 'color'
     valid_moves(board : Array<Array<number>>){
-        var moves : Array<[number,number,number]> = []
-        var size = board.length
-        for( var i=0; i<size; i++)
-            for( var j=0; j<size; j++)
-                for( var s=0; s<4; s++)
+        const moves : Array<[number,number,number]> = []
+        const size = board.length
+        for( let i=0; i<size; i++)
+            for( let j=0; j<size; j++)
+                for( let s=0; s<4; s++)
                     if(this.check(board, i, j, s)) moves.push([i,j,s])
                         return moves
     }
@@ -171,7 +168,7 @@ class Board{
     // If it is an invalid movement stops the game and declares the other 'color' as winner
     move(board: Array<Array<number>>, i: number, j: number, s: number, color:any){
         if(this.check(board, i, j, s)){
-            var ocolor = (color==-2)?-1:-2
+            const ocolor = (color==-2)?-1:-2
             board[i][j] |= 1<<s
             board = this.fill(board, i, j, ocolor)
             if(i>0 && s==0){
@@ -179,9 +176,9 @@ class Board{
                 board = this.fill(board, i-1, j, ocolor)
             }
             if(i<board.length-1 && s==2){
-                board[i+1][j] |= 1
-                board = this.fill(board, i+1, j, ocolor)
-            }
+	    	    if(board[i+1][j] >= 0) board[i+1][j] |= 1
+    	        board = this.fill(board, i+1, j, ocolor)
+    	    }
             if(j>0 && s==3){
                 board[i][j-1] |= 2
                 board = this.fill(board, i, j-1, ocolor)
@@ -198,10 +195,10 @@ class Board{
     
     // Determines the winner of the game if available 'R': red, 'Y': yellow, ' ': none
     winner(board: Array<Array<number>>){
-        var cr = 0
-        var cy = 0
-        for(var i=0; i<board.length; i++)
-            for(var j=0; j<board.length; j++)
+        let cr = 0
+        let cy = 0
+        for(let i=0; i<board.length; i++)
+            for(let j=0; j<board.length; j++)
                 if(board[i][j]<0){
             // TODO: This is just wrong
             if(board[i][j] == -1){ cr++ }else{ cy++ }
@@ -220,12 +217,12 @@ class Board{
             x: number
             commands: Array<{command: string}>
         }
-        var size = board.length
+        const size = board.length
         // Commands to be run (left as string to show them into the editor)
-        var grid : Array<Command> = []
-        for(var i=0; i<size; i++){
-            for(var j=0; j<size; j++){
-                var commands = [{"command":"-"}]
+        const grid : Array<Command> = []
+        for(let i=0; i<size; i++){
+            for(let j=0; j<size; j++){
+                const commands = [{"command":"-"}]
                 if(board[i][j] < 0){
                     if(board[i][j]==-1) commands.push({"command":"R"})
                         else commands.push({"command":"Y"})
@@ -243,7 +240,7 @@ class Board{
             }
         }
         
-        var cmds = {"r":true,"x":1.0/size,"y":1.0/size,"command":"fit", "commands":grid}
+        const cmds = {"r":true,"x":1.0/size,"y":1.0/size,"command":"fit", "commands":grid}
         Konekti.client['canvas'].setText(cmds)
     }
 }
@@ -266,11 +263,11 @@ class RandomPlayer extends Agent{
     
     compute(board : Array<Array<number>>, time : number){
         // Always cheks the current board status since opponent move can change several squares in the board
-        var moves = this.board.valid_moves(board)
+        const moves = this.board.valid_moves(board)
         // Randomly picks one available move
-        var index = Math.floor(moves.length * Math.random())
-        for(var i=0; i<50000000; i++){} // Making it very slow to test time restriction
-        for(var i=0; i<50000000; i++){} // Making it very slow to test time restriction
+        const index = Math.floor(moves.length * Math.random())
+        for(let i=0; i<50000000; i++){} // Making it very slow to test time restriction
+        for(let i=0; i<50000000; i++){} // Making it very slow to test time restriction
         this.memory = this.memory + 1
         console.log ("Mi memoria me dice que este es mi minvimiento " + this.memory + "Soy el color "+ this.color)
         return moves[index]
@@ -288,8 +285,8 @@ class HumanPlayer extends Agent {
     }
     
     compute(board : Array<Array<number>>, time : number) : [number, number, number] {
-        let moves = this.board.valid_moves(board);
-        for (let [index, move] of moves.entries()) {
+        const moves = this.board.valid_moves(board);
+        for (const [index, move] of moves.entries()) {
             console.log(`Movimiento ${index}: Fila ${move[0]}, Columna ${move[1]}, Lado ${move[2]}`);
         }
         
@@ -329,10 +326,10 @@ class BotPlayer extends Agent {
     }
     
     cleanBoard(board : Array<Array<number>>) {
-        let moves : Array<[number, number, number]> = []
+        const moves : Array<[number, number, number]> = []
         // Iterate over all possible moves
-        let boardValidMoves = this.board.valid_moves(board)
-        let size = boardValidMoves.length
+        const boardValidMoves = this.board.valid_moves(board)
+        const size = boardValidMoves.length
         // Iterate over all possible moves
         for (let i = 0; i < size; i++) {
             if (boardValidMoves[i][2] == 0 || boardValidMoves[i][2] == 3) {
@@ -377,17 +374,17 @@ class Environment extends MainClient{
     
     // Initializes the game 
     init(){ 
-        var white = Konekti.vc('R').value // Name of competitor with red pieces
+        const white = Konekti.vc('R').value // Name of competitor with red pieces
         console.log(white)
-        var black = Konekti.vc('Y').value // Name of competitor with yellow pieces
-        var time = 1000*parseInt(Konekti.vc('time').value) // Maximum playing time assigned to a competitor (milliseconds)
-        var size = parseInt(Konekti.vc('size').value) // Size of the reversi board
+        const black = Konekti.vc('Y').value // Name of competitor with yellow pieces
+        const time = 1000*parseInt(Konekti.vc('time').value) // Maximum playing time assigned to a competitor (milliseconds)
+        const size = parseInt(Konekti.vc('size').value) // Size of the reversi board
         
         this.size = size
         this.rb = this.board.init(size)
         this.board.print(this.rb)
-        var b1 = this.board.clone(this.rb)
-        var b2 = this.board.clone(this.rb)
+        const b1 = this.board.clone(this.rb)
+        const b2 = this.board.clone(this.rb)
         
         this.white = white
         this.black = black
@@ -403,22 +400,22 @@ class Environment extends MainClient{
     
     // Listen to play button 
     play(){ 
-        var TIME = 10
-        var x = this
-        var board = x.board
+        const TIME = 10
+        const x = this
+        const board = x.board
         x.player = 'R'
         Konekti.vc('log').innerHTML = 'The winner is...'
         
         x.init()
-        var start = -1
+        let start = -1
         
         function clock(){
             if(x.winner!='') return
             if(start==-1) setTimeout(clock,TIME)
                 else{
-                var end = Date.now()
-                var ellapsed = end - start
-                var remaining = x.ptime[x.player] - ellapsed
+                const end = Date.now()
+                const ellapsed = end - start
+                const remaining = x.ptime[x.player] - ellapsed
                 Konekti.vc(x.player+'_time').innerHTML = remaining
                 Konekti.vc((x.player=='R'?'Y':'R')+'_time').innerHTML = x.ptime[x.player=='R'?'Y':'R']
                 
@@ -428,22 +425,22 @@ class Environment extends MainClient{
         }
         
         function compute(){
-            var w = x.player=='R'
-            var id = w?x.white:x.black
-            var nid = w?x.black:x.white
-            var b = board.clone(x.rb)
+            const w = x.player=='R'
+            const id = w?x.white:x.black
+            const nid = w?x.black:x.white
+            const b = board.clone(x.rb)
             start = Date.now()
-            var action = x.players[id].compute(b, x.ptime[x.player])
-            var end = Date.now()
-            var ply = (x.player=='R')?-1:-2
-            var flag = board.move(x.rb, action[0], action[1], action[2], ply)
+            const action = x.players[id].compute(b, x.ptime[x.player])
+            const end = Date.now()
+            const ply = (x.player=='R')?-1:-2
+            const flag = board.move(x.rb, action[0], action[1], action[2], ply)
             if(!flag){
                 x.winner = nid + ' ...Invalid move taken by ' + id + ' on column ' + action
             }else{
-                var winner = board.winner(x.rb)
+                const winner = board.winner(x.rb)
                 if(winner!= ' ') x.winner = winner
                 else{
-                    var ellapsed = end - start
+                    const ellapsed = end - start
                     x.ptime[x.player] -= ellapsed
                     Konekti.vc(x.player+'_time').innerHTML = ''+x.ptime[x.player]
                     if(x.ptime[x.player] <= 0){ 
