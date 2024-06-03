@@ -7,6 +7,8 @@ Así que solo puse node como método para instalar typescript mas no como un pro
 
 Soy consciente que esto se pudo hacer efectivo con Deno, Ojalá Deno fuera mas popular.
 
+El index.html está en dist
+
 # Instalar dependencias (TypeScript)
 
     npm install

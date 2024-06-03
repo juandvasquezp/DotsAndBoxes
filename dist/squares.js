@@ -14,12 +14,13 @@ Desarrollar un agente que juegue cuadrito. Tiene límite de tiempo:
 5. El método compute debe retornar una lista con tres argumentos [fila, columna, lado]. El valor del lado
 es un número 0: arriba, 1: derecha, 2.abajo, 3:izquierda
 */
+// Rojo -1 o Amarillo -2
 class Agent {
     /**
     * Creates an agent
     */
     constructor() {
-        this.color = '';
+        this.color = 'R';
         this.time = 0;
         this.size = 0;
     }
@@ -105,6 +106,7 @@ class Board {
                         moves.push([i, j, s]);
         return moves;
     }
+    // Fills the board with the given color, it's the opposite color of the given one because of the move() function
     fill(board, i, j, color) {
         if (i < 0 || i == board.length || j < 0 || j == board.length)
             return board;
@@ -142,7 +144,9 @@ class Board {
     // If it is an invalid movement stops the game and declares the other 'color' as winner
     move(board, i, j, s, color) {
         if (this.check(board, i, j, s)) {
-            const ocolor = (color == -2) ? -1 : -2;
+            // console.log("MOVE i: "+i+" j: "+j+" s: "+s+" color: "+color)
+            // Rojo -1 o Amarillo -2
+            const ocolor = (color == -2) ? -1 : -2; // Opposite color
             board[i][j] |= 1 << s;
             board = this.fill(board, i, j, ocolor);
             if (i > 0 && s == 0) {
@@ -167,6 +171,19 @@ class Board {
         return false;
     }
     // Determines the winner of the game if available 'R': red, 'Y': yellow, ' ': none
+    /*
+        TODO:
+        Fijate que esta función se usa para determinar el ganador,
+        recordar que rojo es -1 y amarillo es -2, sin embargo en la linea:
+            if(board[i][j] == -1){ cr++ }else{ cy++ }
+        Solo se hace check a los rojos, el resto es amarillo.
+        Y en esta linea:
+            if(cr+cy<board.length*board.length) return ' '
+        Se comprueba que el tablero no este lleno, si es asi no hay ganador, pero no tiene ningun sentido de ser.
+
+        Recomendación, Crear un board diferente en los agentes que modifique este winner para estados en medio de la partida.
+        O incluso para devolver cuantos rojos y amarillos hay
+    */
     winner(board) {
         let cr = 0;
         let cy = 0;
@@ -257,7 +274,7 @@ class HumanPlayer extends Agent {
     compute(board, time) {
         const moves = this.board.valid_moves(board);
         for (const [index, move] of moves.entries()) {
-            console.log(`Movimiento ${index}: Fila ${move[0]}, Columna ${move[1]}, Lado ${move[2]}`);
+            // console.log(`Movimiento ${index}: Fila ${move[0]}, Columna ${move[1]}, Lado ${move[2]}`);
         }
         let userMove;
         while (true) {
@@ -318,6 +335,13 @@ class Environment extends MainClient {
         super();
         this.board = new Board();
         this.players = {};
+        this.size = 0;
+        this.rb = [];
+        this.white = 'Red';
+        this.black = 'Yellow';
+        this.ptime = { 'R': 0, 'Y': 0 };
+        this.player = 'R';
+        this.winner = '';
     }
     setPlayers(players) { this.players = players; }
     // Initializes the game 

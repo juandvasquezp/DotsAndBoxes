@@ -24,8 +24,12 @@
 		function KonektiMain(){
 			var client = new Environment()
 			client.setPlayers({
-				'rand1': new RandomPlayer(),
-				'rand2': new RandomPlayer()
+				'rand1': new RandomPlayer( 'R' ),
+				'rand2': new RandomPlayer( 'Y' ),
+				'h1' : new HumanPlayer( 'R' ),
+				'h2' : new HumanPlayer( 'Y' ),
+				'b1' : new BotPlayer( 'R' ),
+				'b2' : new BotPlayer( 'Y' ),
 				// Add your agent here: for example if you create a class "MyAgent" and your team is "RexTeam" add something like
 				//'RexTeam': new MyAgent()
 				// You will be able to call it from the interface using the name of your team playing with red or yellow pieces
