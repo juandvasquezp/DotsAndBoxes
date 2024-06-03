@@ -172,17 +172,17 @@ class Board {
     }
     // Determines the winner of the game if available 'R': red, 'Y': yellow, ' ': none
     /*
-        TODO:
-        Fijate que esta función se usa para determinar el ganador,
-        recordar que rojo es -1 y amarillo es -2, sin embargo en la linea:
-            if(board[i][j] == -1){ cr++ }else{ cy++ }
-        Solo se hace check a los rojos, el resto es amarillo.
-        Y en esta linea:
-            if(cr+cy<board.length*board.length) return ' '
-        Se comprueba que el tablero no este lleno, si es asi no hay ganador, pero no tiene ningun sentido de ser.
-
-        Recomendación, Crear un board diferente en los agentes que modifique este winner para estados en medio de la partida.
-        O incluso para devolver cuantos rojos y amarillos hay
+    TODO:
+    Fijate que esta función se usa para determinar el ganador,
+    recordar que rojo es -1 y amarillo es -2, sin embargo en la linea:
+    if(board[i][j] == -1){ cr++ }else{ cy++ }
+    Solo se hace check a los rojos, el resto es amarillo.
+    Y en esta linea:
+    if(cr+cy<board.length*board.length) return ' '
+    Se comprueba que el tablero no este lleno, si es asi no hay ganador, pero no tiene ningun sentido de ser.
+    
+    Recomendación, Crear un board diferente en los agentes que modifique este winner para estados en medio de la partida.
+    O incluso para devolver cuantos rojos y amarillos hay
     */
     winner(board) {
         let cr = 0;
@@ -247,11 +247,10 @@ class Board {
 *
 */
 class RandomPlayer extends Agent {
-    constructor(color) {
+    constructor() {
         super();
         this.board = new Board();
         this.memory = 0;
-        this.color = color;
     }
     compute(board, time) {
         // Always cheks the current board status since opponent move can change several squares in the board
@@ -261,15 +260,14 @@ class RandomPlayer extends Agent {
         for (let i = 0; i < 50000000; i++) { } // Making it very slow to test time restriction
         for (let i = 0; i < 50000000; i++) { } // Making it very slow to test time restriction
         this.memory = this.memory + 1;
-        console.log("Mi memoria me dice que este es mi minvimiento " + this.memory + "Soy el color " + this.color);
+        console.log("Mi memoria me dice que este es mi movimiento " + this.memory + "Soy el color " + this.color);
         return moves[index];
     }
 }
 class HumanPlayer extends Agent {
-    constructor(color) {
+    constructor() {
         super();
         this.board = new Board();
-        this.color = color;
     }
     compute(board, time) {
         const moves = this.board.valid_moves(board);
@@ -296,12 +294,11 @@ class HumanPlayer extends Agent {
     }
 }
 class BotPlayer extends Agent {
-    constructor(color) {
+    constructor() {
         super();
         this.firstTime = false;
         this.board = new Board();
         // this.cleanBoardMoves = [];
-        this.color = color;
         this.validMovesList = [];
     }
     cleanBoard(board) {

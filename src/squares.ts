@@ -182,9 +182,9 @@ class Board{
                 board = this.fill(board, i-1, j, ocolor)
             }
             if(i<board.length-1 && s==2){
-	    	    if(board[i+1][j] >= 0) board[i+1][j] |= 1
-    	        board = this.fill(board, i+1, j, ocolor)
-    	    }
+                if(board[i+1][j] >= 0) board[i+1][j] |= 1
+                board = this.fill(board, i+1, j, ocolor)
+            }
             if(j>0 && s==3){
                 board[i][j-1] |= 2
                 board = this.fill(board, i, j-1, ocolor)
@@ -200,19 +200,19 @@ class Board{
     }
     
     // Determines the winner of the game if available 'R': red, 'Y': yellow, ' ': none
-
+    
     /*
-        TODO:
-        Fijate que esta función se usa para determinar el ganador,
-        recordar que rojo es -1 y amarillo es -2, sin embargo en la linea:
-            if(board[i][j] == -1){ cr++ }else{ cy++ }
-        Solo se hace check a los rojos, el resto es amarillo.
-        Y en esta linea:
-            if(cr+cy<board.length*board.length) return ' '
-        Se comprueba que el tablero no este lleno, si es asi no hay ganador, pero no tiene ningun sentido de ser.
-
-        Recomendación, Crear un board diferente en los agentes que modifique este winner para estados en medio de la partida.
-        O incluso para devolver cuantos rojos y amarillos hay
+    TODO:
+    Fijate que esta función se usa para determinar el ganador,
+    recordar que rojo es -1 y amarillo es -2, sin embargo en la linea:
+    if(board[i][j] == -1){ cr++ }else{ cy++ }
+    Solo se hace check a los rojos, el resto es amarillo.
+    Y en esta linea:
+    if(cr+cy<board.length*board.length) return ' '
+    Se comprueba que el tablero no este lleno, si es asi no hay ganador, pero no tiene ningun sentido de ser.
+    
+    Recomendación, Crear un board diferente en los agentes que modifique este winner para estados en medio de la partida.
+    O incluso para devolver cuantos rojos y amarillos hay
     */
     winner(board: Array<Array<number>>){
         let cr = 0
@@ -274,11 +274,10 @@ class RandomPlayer extends Agent{
     public board: Board;
     public memory: number;
     
-    constructor(color : 'R' | 'Y') {
+    constructor() {
         super() 
         this.board = new Board()
         this.memory = 0
-        this.color = color
     }
     
     compute(board : Array<Array<number>>, time : number){
@@ -289,7 +288,7 @@ class RandomPlayer extends Agent{
         for(let i=0; i<50000000; i++){} // Making it very slow to test time restriction
         for(let i=0; i<50000000; i++){} // Making it very slow to test time restriction
         this.memory = this.memory + 1
-        console.log ("Mi memoria me dice que este es mi minvimiento " + this.memory + "Soy el color "+ this.color)
+        console.log ("Mi memoria me dice que este es mi movimiento " + this.memory + "Soy el color "+ this.color)
         return moves[index]
     }
 }
@@ -298,10 +297,9 @@ class RandomPlayer extends Agent{
 class HumanPlayer extends Agent {
     public board: Board;
     
-    constructor(color : 'R' | 'Y') {
+    constructor() {
         super();
         this.board = new Board();
-        this.color = color; 
     }
     
     compute(board : Array<Array<number>>, time : number) : [number, number, number] {
@@ -336,12 +334,11 @@ class BotPlayer extends Agent {
     public board: Board;
     public validMovesList: Array<[number, number, number]>;
     
-    constructor(color : 'R' | 'Y') {
+    constructor() {
         super();
         this.firstTime = false;
         this.board = new Board();
         // this.cleanBoardMoves = [];
-        this.color = color;
         this.validMovesList = [];
     }
     
