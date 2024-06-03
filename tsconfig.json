@@ -1,0 +1,43 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "esModuleInterop": true,
+        "target": "es6",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "allowJs": true,
+        "rootDir": "src",
+        "baseUrl": "src",
+        "outDir": "dist",
+    },
+    "include": [
+        "src/**/*.ts",
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        ".vscode"
+    ],
+    "ts-node": {
+        "compilerOptions": {
+            "target": "es6",
+            "module": "commonjs"
+        }
+    },
+    "lib": ["es2015"],
+    "nodemonConfig": {
+        "ignore": [
+            "**/*.test.ts",
+            "**/*.spec.ts",
+            ".git",
+            "node_modules"
+        ],
+        "watch": [
+            "src"
+        ],
+        "exec": "npm start",
+        "ext": "ts"
+    },
+}
