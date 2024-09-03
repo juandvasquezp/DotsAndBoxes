@@ -265,107 +265,197 @@ class Board{
     }
 }
 
+class CustomBoard extends Board {
+    constructor() {
+        super();
+    }
+
+    // Clean valid_moves
+    clean_valid_moves(board : Array<Array<number>>){
+        const moves = this.valid_moves(board);
+        const clean_moves = [];
+        for (let i = 0; i < moves.length; i++) {
+            if (moves[i][2] == 1 || moves[i][2] == 2) {
+                clean_moves.push(moves[i]);
+            }
+        }
+        return clean_moves;
+    }
+
+    // Returns the current score of the board, red maximizes, yellow minimizes
+    check_score(board: Array<Array<number>>): number {
+        let redScore = 0;
+        let yellowScore = 0;
+
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[i].length; j++) {
+                if (board[i][j] == -1) {
+                    redScore++;
+                } else if (board[i][j] == -2) {
+                    yellowScore++;
+                }
+            }
+        }
+
+        return redScore - yellowScore;
+    }
+}
+
+
 /*
 * Player's Code (Must inherit from Agent: It is mandatory the inheritance process) 
 * This is an example of a rangom player agent
 *
 */
 class RandomPlayer extends Agent{
-    public board: Board;
+    public board: CustomBoard;
     public memory: number;
     
     constructor() {
         super() 
-        this.board = new Board()
+        this.board = new CustomBoard();
         this.memory = 0
     }
     
     compute(board : Array<Array<number>>, time : number){
         // Always cheks the current board status since opponent move can change several squares in the board
-        const moves = this.board.valid_moves(board)
+        const moves = this.board.clean_valid_moves(board);
         // Randomly picks one available move
         const index = Math.floor(moves.length * Math.random())
         for(let i=0; i<50000000; i++){} // Making it very slow to test time restriction
         for(let i=0; i<50000000; i++){} // Making it very slow to test time restriction
         this.memory = this.memory + 1
         console.log ("Mi memoria me dice que este es mi movimiento " + this.memory + "Soy el color "+ this.color)
+        console.log("Este es el lista de movimientos: ")
+        for (let i = 0; i < moves.length; i++) {
+            console.log(moves[i])
+        }
         return moves[index]
     }
 }
 
-
-class HumanPlayer extends Agent {
-    public board: Board;
+class DefensivePlayer extends Agent {
+    public boardOps: CustomBoard;
     
     constructor() {
         super();
-        this.board = new Board();
+        this.boardOps = new CustomBoard();
     }
     
-    compute(board : Array<Array<number>>, time : number) : [number, number, number] {
-        const moves = this.board.valid_moves(board);
-        for (const [index, move] of moves.entries()) {
-            // console.log(`Movimiento ${index}: Fila ${move[0]}, Columna ${move[1]}, Lado ${move[2]}`);
+    compute(board: Array<Array<number>>, time: number): [number, number, number] {
+        const maximizing = this.color === 'R';
+        const icolor = (maximizing) ? -1 : -2;
+        const moves = this.boardOps.clean_valid_moves(board);
+        let bestMove = moves[0];
+        
+        if (maximizing) {
+            let currentMax = -Infinity;
+            for (let i = 0; i < moves.length; i++) {
+                const testBoard = this.boardOps.clone(board);
+                this.boardOps.move(testBoard, moves[i][0], moves[i][1], moves[i][2], icolor);
+                const score = this.boardOps.check_score(testBoard);
+                if (score > currentMax) {
+                    currentMax = score;
+                    bestMove = moves[i];
+                }
+            }
+        } else {
+            let currentMin = Infinity;
+            for (let i = 0; i < moves.length; i++) {
+                const testBoard = this.boardOps.clone(board);
+                this.boardOps.move(testBoard, moves[i][0], moves[i][1], moves[i][2], icolor);
+                const score = this.boardOps.check_score(testBoard);
+                if (score < currentMin) {
+                    currentMin = score;
+                    bestMove = moves[i];
+                }
+            }
         }
+        return bestMove;
+    }
+}
+type MoveAndScore = [[number, number, number], number];
+class MinMaxPlayer extends Agent {
+    public boardOps: CustomBoard;
+    
+    constructor() {
+        super();
+        this.boardOps = new CustomBoard();
+    }
+
+    compute(board: Array<Array<number>>, time: number): [number, number, number] {
+        const depth = 4;
+        let alpha = -Infinity;
+        let beta = Infinity;
+
+        const maximizing = this.color === 'R';
+
+        const moves = this.boardOps.clean_valid_moves(board);
+        let bestMove = moves[0];
         
-        let userMove: [number, number, number];
+        if (maximizing) {
+            const evaluation = this.minmax(board, depth, alpha, beta, true);
+            bestMove = evaluation[0];
+            console.log("Mi mejor score es: " + evaluation[1]);
+        } else {
+            const evaluation = this.minmax(board, depth, alpha, beta, false);
+            bestMove = evaluation[0];
+            console.log("Mi peor score es: " + evaluation[1]);
+        }
+
+        return bestMove;
+    }
+    
+    
+    
+    minmax (board: Array<Array<number>>, depth: number, alpha: number, beta: number, maximizing: boolean) : MoveAndScore {
+        const moves = this.boardOps.clean_valid_moves(board);
         
-        while (true) {
-            // Solicitar al usuario que elija un movimiento
-            const userInput : string | null = prompt(`Elija un movimiento (Fila, Columna, Lado), jugador ${this.color}:`);
-            while (userInput == null) {
-                const userInput : string | null = prompt(`Elija un movimiento (Fila, Columna, Lado), jugador ${this.color}:`);
+        if (depth === 0 || moves.length === 0) {
+            const score = this.boardOps.check_score(board);
+            return [[0, 0, 0], score];
+        }
+
+        if (maximizing) {
+            let bestMove = [0, 0, 0] as [number, number, number]; //This one shouldn't happen
+            let currentMax = -Infinity;
+            const icolor = -1; // We are red
+            for (let i = 0; i < moves.length; i++) {
+                const testBoard = this.boardOps.clone(board);
+                this.boardOps.move(testBoard, moves[i][0], moves[i][1], moves[i][2], icolor);
+                const evaluation = this.minmax(testBoard, depth - 1, alpha, beta, false);
+                if (evaluation[1] > currentMax) {
+                    currentMax = evaluation[1];
+                    bestMove = moves[i];
+                }
+                alpha = Math.max(alpha, evaluation[1]);
+                if (beta <= alpha) {
+                    break;
+                }
             }
-            const move = userInput.split(" ").map(value => parseInt(value,10));
-            
-            // Perform type check
-            if (move.length !== 3 || !Number.isInteger(move[0]) || !Number.isInteger(move[1]) || !Number.isInteger(move[2])) {
-                console.log("Movimiento inválido. Por favor, ingrese nuevamente.");
-            } else {
-                userMove = move as [number, number, number];
-                return userMove;
+            return [bestMove, currentMax];
+        } else {
+            let bestMove = [0, 0, 0] as [number, number, number]; //This one shouldn't happen
+            let currentMin = Infinity;
+            const icolor = -2; // We are yellow
+            for (let i = 0; i < moves.length; i++) {
+                const testBoard = this.boardOps.clone(board);
+                this.boardOps.move(testBoard, moves[i][0], moves[i][1], moves[i][2], icolor);
+                const evaluation = this.minmax(testBoard, depth - 1, alpha, beta, true);
+                if (evaluation[1] < currentMin) {
+                    currentMin = evaluation[1];
+                    bestMove = moves[i];
+                }
+                beta = Math.min(beta, evaluation[1]);
+                if (beta <= alpha) {
+                    break;
+                }
             }
+            return [bestMove, currentMin];
         }
     }
 }
 
-class BotPlayer extends Agent {
-    public firstTime: boolean;
-    public board: Board;
-    public validMovesList: Array<[number, number, number]>;
-    
-    constructor() {
-        super();
-        this.firstTime = false;
-        this.board = new Board();
-        // this.cleanBoardMoves = [];
-        this.validMovesList = [];
-    }
-    
-    cleanBoard(board : Array<Array<number>>) {
-        const moves : Array<[number, number, number]> = []
-        // Iterate over all possible moves
-        const boardValidMoves = this.board.valid_moves(board)
-        const size = boardValidMoves.length
-        // Iterate over all possible moves
-        for (let i = 0; i < size; i++) {
-            if (boardValidMoves[i][2] == 0 || boardValidMoves[i][2] == 3) {
-                moves.push(boardValidMoves[i])
-            }
-        }
-        this.validMovesList = moves
-        if (!this.firstTime) {
-            this.firstTime = true
-            // We make a copy of the board like it was clean
-        }
-        return moves
-    }
-    
-    compute(board: Array<Array<number>>, time: number) {
-        //TODO
-        return [0, 0, 0] as [number, number, number]
-    }
-}
 
 /*
 * Environment (Cannot be modified or any of its attributes accesed directly)
