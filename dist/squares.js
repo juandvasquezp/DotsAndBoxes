@@ -244,6 +244,20 @@ class Board {
 class CustomBoard extends Board {
     constructor() {
         super();
+        this.max_moves = 0;
+        this.ultimate_moves = 0;
+        this.size = 0;
+        this.fooder_moves = 0;
+    }
+    initialize(board) {
+        this.size = board.length;
+        this.max_moves = 2 * this.size * this.size - 2 * this.size;
+        this.ultimate_moves = 2 * this.size * (this.size / 2 - 1);
+        this.fooder_moves = this.max_moves - this.ultimate_moves;
+        console.log("Inicializando tablero");
+        console.log("Max moves: " + this.max_moves);
+        console.log("Ultimate moves: " + this.ultimate_moves);
+        console.log("Total moves: " + this.fooder_moves);
     }
     // Clean valid_moves
     clean_valid_moves(board) {
@@ -300,6 +314,37 @@ class RandomPlayer extends Agent {
         return moves[index];
     }
 }
+class HumanPlayer extends Agent {
+    constructor() {
+        super();
+        this.board = new Board();
+    }
+    compute(board, time) {
+        /*
+        const moves = this.board.valid_moves(board);
+        for (const [index, move] of moves.entries()) {
+            // console.log(`Movimiento ${index}: Fila ${move[0]}, Columna ${move[1]}, Lado ${move[2]}`);
+        }
+        */
+        let userMove;
+        while (true) {
+            // Solicitar al usuario que elija un movimiento
+            let userInput = prompt(`Elija un movimiento (Fila, Columna, Lado), jugador ${this.color}:`);
+            while (userInput == null) {
+                userInput = prompt(`Elija un movimiento (Fila, Columna, Lado), jugador ${this.color}:`);
+            }
+            const move = userInput.split(" ").map(value => parseInt(value, 10));
+            // Perform type check
+            if (move.length !== 3 || !Number.isInteger(move[0]) || !Number.isInteger(move[1]) || !Number.isInteger(move[2])) {
+                console.log("Movimiento inválido. Por favor, ingrese nuevamente.");
+            }
+            else {
+                userMove = move;
+                return userMove;
+            }
+        }
+    }
+}
 class DefensivePlayer extends Agent {
     constructor() {
         super();
@@ -341,21 +386,45 @@ class MinMaxPlayer extends Agent {
     constructor() {
         super();
         this.boardOps = new CustomBoard();
+        this.firstMove = true;
     }
     compute(board, time) {
-        const depth = 4;
-        let alpha = -Infinity;
-        let beta = Infinity;
+        if (this.firstMove) {
+            this.boardOps.initialize(board);
+            this.firstMove = false;
+        }
+        const totalMoves = this.boardOps.ultimate_moves;
+        const remainingMoves = this.boardOps.clean_valid_moves(board).length - this.boardOps.fooder_moves;
+        /*
+        const totalMoves = this.boardOps.total_moves(board); // Total possible moves at the start of the game
+        const remainingMoves = this.boardOps.clean_valid_moves(board).length;
+        */
+        let depth;
+        //console.log("Estoy en un tablero de: " + totalMoves + " cuadrados");
+        //console.log("Quedan: " + remainingMoves + " cuadrados por jugar");
+        if (remainingMoves > totalMoves * 0.50) {
+            //console.log("Estoy en early game");
+            depth = 1; // Early game
+        }
+        else if (remainingMoves > totalMoves * 0.25) {
+            //console.log("Estoy en mid game");
+            depth = 3; // Mid game
+        }
+        else {
+            //console.log("Estoy en end game");
+            depth = 4; // End game
+        }
         const maximizing = this.color === 'R';
+        console.log("Mi color es: " + this.color);
         const moves = this.boardOps.clean_valid_moves(board);
         let bestMove = moves[0];
         if (maximizing) {
-            const evaluation = this.minmax(board, depth, alpha, beta, true);
+            const evaluation = this.minmax(board, depth, -Infinity, Infinity, true);
             bestMove = evaluation[0];
             console.log("Mi mejor score es: " + evaluation[1]);
         }
         else {
-            const evaluation = this.minmax(board, depth, alpha, beta, false);
+            const evaluation = this.minmax(board, depth, -Infinity, Infinity, false);
             bestMove = evaluation[0];
             console.log("Mi peor score es: " + evaluation[1]);
         }
